@@ -2,44 +2,58 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reading Time Estimator</title>
 <style>
-body{font-family:Arial;background:#f0fdfa;padding:25px}
-main{max-width:700px;margin:auto;background:white;padding:30px;border-radius:16px}
-textarea{width:100%;height:220px;padding:15px;box-sizing:border-box;border:1px solid #99f6e4;border-radius:8px}
-input{width:100%;margin:15px 0}
-#result{background:#ccfbf1;padding:25px;border-radius:10px;white-space:pre-line;line-height:2;font-size:20px}
-button{background:#0d9488;color:white;border:0;padding:12px 18px;border-radius:8px;cursor:pointer;margin-top:15px}
+body{font-family:Arial;background:#ecfeff;padding:25px}
+main{max-width:650px;margin:auto;background:white;padding:25px;border-radius:15px}
+textarea{width:100%;height:230px;padding:13px;box-sizing:border-box;border:1px solid #67e8f9;border-radius:8px}
+input{width:100%}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:20px}
+.stat{background:#cffafe;padding:18px;border-radius:9px;text-align:center}
+strong{font-size:25px;color:#0e7490}
 </style>
 </head>
 <body>
 <main>
 <h1>Reading Time Estimator</h1>
-<p>Estimate how long an article will take to read.</p>
-<textarea id="text" placeholder="Paste your article here..." oninput="calculate()"></textarea>
-<label>Reading Speed: <strong id="speedLabel"></strong> words/minute</label>
-<input id="speed" type="range" min="50" max="500" value="200" oninput="calculate()">
-<div id="result"></div>
-<button onclick="clearText()">Clear Article</button>
+<p>Paste your article to estimate reading time.</p>
+<textarea id="text" placeholder="Paste or write your text here..."></textarea>
+
+<label>Reading Speed: <span id="speedValue">200</span> words per minute</label>
+<input id="speed" type="range" min="50" max="500" value="200">
+
+<div class="stats">
+<div class="stat">Word Count<br><strong id="words">0</strong></div>
+<div class="stat">Characters<br><strong id="chars">0</strong></div>
+<div class="stat">Reading Time<br><strong id="time">0 min</strong></div>
+<div class="stat">Sentences<br><strong id="sentences">0</strong></div>
+</div>
 </main>
 <script>
-function calculate(){
- const text=document.getElementById("text").value.trim();
+function estimate(){
+ const text=document.getElementById("text").value;
  const speed=Number(document.getElementById("speed").value);
- const count=text?text.split(/\s+/).length:0;
- const seconds=Math.ceil(count/speed*60);
- const minutes=Math.floor(seconds/60);
- document.getElementById("speedLabel").textContent=speed;
- document.getElementById("result").textContent=
- "Total Words: "+count+
- "\nReading Time: "+minutes+" minutes "+seconds%60+" seconds";
+ const words=text.trim()?text.trim().split(/\s+/).length:0;
+ const sentences=text.trim()?text.split(/[.!?]+/).filter(x=>x.trim()).length:0;
+
+ const minutes=words/speed;
+ let display;
+
+ if(minutes===0)display="0 min";
+ else if(minutes<1)display=Math.max(1,Math.ceil(minutes*60))+" sec";
+ else display=Math.ceil(minutes)+" min";
+
+ document.getElementById("words").textContent=words;
+ document.getElementById("chars").textContent=text.length;
+ document.getElementById("sentences").textContent=sentences;
+ document.getElementById("time").textContent=display;
+ document.getElementById("speedValue").textContent=speed;
 }
-function clearText(){
- document.getElementById("text").value="";
- calculate();
-}
-calculate();
+
+document.getElementById("text").addEventListener("input",estimate);
+document.getElementById("speed").addEventListener("input",estimate);
+estimate();
 </script>
 </body>
 </html>
